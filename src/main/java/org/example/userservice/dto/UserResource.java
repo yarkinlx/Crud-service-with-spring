@@ -1,10 +1,13 @@
 package org.example.userservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.LocalDateTime;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.core.Relation;
+
 import java.util.Objects;
 
-public class UserResponse {
+@Relation(collectionRelation = "users", itemRelation = "user")
+public class UserResource extends RepresentationModel<UserResource> {
 
     @JsonProperty("id")
     private Long id;
@@ -19,12 +22,12 @@ public class UserResponse {
     private Integer age;
 
     @JsonProperty("createdAt")
-    private LocalDateTime createdAt;
+    private String createdAt;
 
-    public UserResponse() {
+    public UserResource() {
     }
 
-    public UserResponse(Long id, String name, String email, Integer age, LocalDateTime createdAt) {
+    public UserResource(Long id, String name, String email, Integer age, String createdAt) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -32,6 +35,7 @@ public class UserResponse {
         this.createdAt = createdAt;
     }
 
+    // Геттеры и сеттеры
     public Long getId() {
         return id;
     }
@@ -64,11 +68,11 @@ public class UserResponse {
         this.age = age;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
 
@@ -76,7 +80,8 @@ public class UserResponse {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UserResponse that = (UserResponse) o;
+        if (!super.equals(o)) return false;
+        UserResource that = (UserResource) o;
         return Objects.equals(id, that.id) &&
                 Objects.equals(name, that.name) &&
                 Objects.equals(email, that.email) &&
@@ -86,17 +91,6 @@ public class UserResponse {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, email, age, createdAt);
-    }
-
-    @Override
-    public String toString() {
-        return "UserResponse{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", age=" + age +
-                ", createdAt=" + createdAt +
-                '}';
+        return Objects.hash(super.hashCode(), id, name, email, age, createdAt);
     }
 }

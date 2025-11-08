@@ -2,6 +2,7 @@ package org.example.userservice.service;
 
 import org.example.userservice.dto.UserRequest;
 import org.example.userservice.dto.UserResponse;
+import org.example.userservice.event.UserEvent;
 import org.example.userservice.exception.DuplicateEmailException;
 import org.example.userservice.exception.ResourceNotFoundException;
 import org.example.userservice.model.User;
@@ -18,10 +19,12 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserEventPublisher userEventPublisher;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserEventPublisher userEventPublisher) {
         this.userRepository = userRepository;
+        this.userEventPublisher = userEventPublisher;
     }
 
     @Override
@@ -34,6 +37,10 @@ public class UserServiceImpl implements UserService {
         user.setAge(userRequest.getAge());
 
         User savedUser = userRepository.save(user);
+
+        UserEvent userEvent = new UserEvent("CREATED", savedUser.getEmail(), savedUser.getId());
+        userEventPublisher.publishUserEvent(userEvent);
+
         return mapToUserResponse(savedUser);
     }
 
@@ -71,10 +78,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new ResourceNotFoundException("User not found with id: " + id);
-        }
+        User user = findUserById(id);
+        String userEmail = user.getEmail();
+
         userRepository.deleteById(id);
+
+        UserEvent userEvent = new UserEvent("DELETED", userEmail, id);
+        userEventPublisher.publishUserEvent(userEvent);
     }
 
     @Override
