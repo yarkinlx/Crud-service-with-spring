@@ -18,7 +18,7 @@ public class UserEvent {
         this.timestamp = LocalDateTime.now();
     }
 
-    // Getters and Setters
+
     public String getEventType() {
         return eventType;
     }
